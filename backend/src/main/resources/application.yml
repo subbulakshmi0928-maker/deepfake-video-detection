@@ -1,0 +1,43 @@
+server:
+  port: ${PORT:8080}
+  tomcat:
+    # Keep reading an oversized body so the client receives the 413 JSON instead of a connection reset.
+    max-swallow-size: 220MB
+
+spring:
+  application:
+    name: deepfake-backend
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/deepfake_db}
+    username: ${DB_USER:deepfake}
+    password: ${DB_PASSWORD:deepfake}
+  jpa:
+    hibernate:
+      ddl-auto: none
+    open-in-view: false
+    properties:
+      hibernate:
+        # created_at is a plain TIMESTAMP column (PostgreSQL 9.5): read/write it in UTC consistently.
+        jdbc:
+          time_zone: UTC
+  sql:
+    init:
+      mode: always
+  servlet:
+    multipart:
+      max-file-size: 200MB
+      max-request-size: 210MB
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+app:
+  ml:
+    base-url: ${ML_BASE_URL:http://localhost:8000}
+    connect-timeout-ms: 5000
+    read-timeout-ms: ${ML_READ_TIMEOUT_MS:180000}
+  storage:
+    dir: ${APP_STORAGE_DIR:./uploads}

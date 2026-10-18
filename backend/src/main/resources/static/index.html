@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deepfake Video Detection</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <span class="logo" aria-hidden="true"></span>
+    <div>
+      <h1>Deepfake Video Detection</h1>
+      <p>Spring Boot · PostgreSQL · FastAPI · ResNeXt50 + recurrent head</p>
+    </div>
+  </div>
+  <div id="ml-status" class="pill pill-muted" title="ML service status">checking ML service…</div>
+</header>
+
+<main>
+  <section class="grid">
+    <div class="card">
+      <h2>Analyze a video</h2>
+      <div id="drop" class="drop" tabindex="0" role="button" aria-label="Choose or drop a video">
+        <input id="file" type="file" accept="video/mp4,video/quicktime,video/x-msvideo,video/x-matroska,video/webm,.mp4,.mov,.avi,.mkv,.webm" hidden>
+        <p class="drop-title">Drop a video here or <u>browse</u></p>
+        <p class="drop-sub">MP4, MOV, AVI, MKV, WEBM · up to 200 MB</p>
+      </div>
+      <video id="preview" class="preview" controls muted playsinline hidden></video>
+      <div class="row">
+        <span id="file-name" class="muted">No file selected</span>
+        <button id="analyze" class="btn" disabled>Analyze</button>
+      </div>
+      <div id="progress" class="progress" hidden><div class="bar"></div><span class="progress-text">Uploading…</span></div>
+      <p id="error" class="error" hidden></p>
+    </div>
+
+    <div class="card result-card">
+      <h2>Result</h2>
+      <div id="result" class="result empty">
+        <p class="muted">Upload a video to see the verdict, confidence and frame statistics.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="stats" id="stats">
+    <div class="stat"><span class="stat-label">Analyses</span><span class="stat-value" id="s-total">–</span></div>
+    <div class="stat"><span class="stat-label">Fake</span><span class="stat-value fake" id="s-fake">–</span></div>
+    <div class="stat"><span class="stat-label">Real</span><span class="stat-value real" id="s-real">–</span></div>
+    <div class="stat"><span class="stat-label">Avg confidence</span><span class="stat-value" id="s-avg">–</span></div>
+  </section>
+
+  <section class="card">
+    <div class="row">
+      <h2>History</h2>
+      <button id="refresh" class="btn btn-ghost">Refresh</button>
+    </div>
+    <div class="table-wrap">
+      <table id="history">
+        <thead><tr><th>When</th><th>File</th><th>Verdict</th><th>Confidence</th><th>Frames</th><th>Faces</th><th>Time</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <p id="history-empty" class="muted" hidden>No analyses yet.</p>
+  </section>
+</main>
+
+<footer>
+  <span>Built by <a href="https://github.com/subbulakshmi0928-maker" target="_blank" rel="noopener">Subbulakshmi S</a></span>
+  <span>·</span>
+  <a href="/api/health" target="_blank" rel="noopener">API health</a>
+  <span>·</span>
+  <a href="/actuator/health" target="_blank" rel="noopener">Actuator</a>
+</footer>
+<script src="app.js"></script>
+</body>
+</html>

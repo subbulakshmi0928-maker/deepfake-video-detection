@@ -1,0 +1,48 @@
+# One-command stack: PostgreSQL + ML microservice + Spring Boot backend (which also serves the web UI).
+#   docker compose up --build
+# Put a trained checkpoint in ml-service/weights/ first (see README "Model weights").
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: deepfake_db
+      POSTGRES_USER: deepfake
+      POSTGRES_PASSWORD: deepfake
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U deepfake -d deepfake_db"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  ml-service:
+    build: ./ml-service
+    environment:
+      DEVICE: cpu
+      WEIGHTS_DIR: /srv/weights
+    volumes:
+      - ./ml-service/weights:/srv/weights:ro
+    ports:
+      - "8000:8000"
+
+  backend:
+    build: ./backend
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/deepfake_db
+      DB_USER: deepfake
+      DB_PASSWORD: deepfake
+      ML_BASE_URL: http://ml-service:8000
+    volumes:
+      - uploads:/app/uploads
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      ml-service:
+        condition: service_started
+
+volumes:
+  pgdata:
+  uploads:

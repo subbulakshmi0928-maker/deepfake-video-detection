@@ -1,0 +1,25 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  sql:
+    init:
+      mode: never
+
+app:
+  ml:
+    base-url: http://localhost:65535
+    connect-timeout-ms: 500
+    read-timeout-ms: 1000
+  storage:
+    dir: ${java.io.tmpdir}/deepfake-backend-tests

@@ -1,0 +1,8 @@
+# Activate with SPRING_PROFILES_ACTIVE=legacypg when the PostgreSQL server is older than 12.
+# Hibernate 6 paginates with "OFFSET ? ROWS FETCH FIRST ? ROWS ONLY", which PostgreSQL < 11 rejects for a bound
+# parameter; LegacyPostgresDialect switches pagination to LIMIT ? OFFSET ?.
+spring:
+  jpa:
+    properties:
+      hibernate:
+        dialect: com.subbulakshmi.deepfake.config.LegacyPostgresDialect
