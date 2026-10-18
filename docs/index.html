@@ -1,0 +1,449 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Documentation for the Deepfake Video Detection platform: architecture, quick start, API reference, ML model, deployment and troubleshooting.">
+<style>img{max-width:100%}</style>
+<title>Deepfake Video Detection Docs</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: sticky left nav + 68ch reading column; tables and code scroll inside their own boxes. */
+:root{
+  --bg:#f6f8fa;--surface:#ffffff;--fg:#141a24;--muted:#5b6678;--line:#dde3ea;
+  --accent:#0f766e;--accent-ink:#0b5f59;--accent-soft:#e3f3f1;--code-bg:#eef2f6;--code-fg:#1f2937;
+  --real:#15803d;--fake:#b91c1c;--warn:#b45309;--warn-soft:#fff4e5;
+  --font-display:"Manrope","IBM Plex Sans",system-ui,sans-serif;
+  --font-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --radius:10px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0e141c;--surface:#131b26;--fg:#e7edf5;--muted:#9aa7b8;--line:#243041;
+  --accent:#2dd4bf;--accent-ink:#5eead4;--accent-soft:#12302e;--code-bg:#0b1118;--code-fg:#dbe4ee;
+  --real:#4ade80;--fake:#f87171;--warn:#fbbf24;--warn-soft:#2a2113;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e141c;--surface:#131b26;--fg:#e7edf5;--muted:#9aa7b8;--line:#243041;
+  --accent:#2dd4bf;--accent-ink:#5eead4;--accent-soft:#12302e;--code-bg:#0b1118;--code-fg:#dbe4ee;
+  --real:#4ade80;--fake:#f87171;--warn:#fbbf24;--warn-soft:#2a2113;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.6 var(--font-body);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 48px}
+a{color:var(--accent-ink);text-decoration-color:color-mix(in srgb,var(--accent) 50%,transparent)}
+a:hover{text-decoration-color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+h1,h2,h3{font-family:var(--font-display);text-wrap:balance;line-height:1.2;margin:0}
+h1{font-size:clamp(28px,4vw,38px);font-weight:800;letter-spacing:-.01em}
+h2{font-size:24px;font-weight:700;margin-top:56px;padding-top:12px;border-top:1px solid var(--line)}
+h3{font-size:17px;font-weight:700;margin-top:28px}
+p{margin:12px 0;max-width:68ch}
+ul,ol{max-width:68ch;padding-left:22px}
+li{margin:4px 0}
+code{font-family:var(--font-mono);font-size:.9em;background:var(--code-bg);color:var(--code-fg);padding:1px 5px;border-radius:5px}
+pre{font-family:var(--font-mono);font-size:13.5px;line-height:1.55;background:var(--code-bg);color:var(--code-fg);
+  border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;overflow-x:auto;margin:14px 0;max-width:100%}
+pre code{background:none;padding:0;font-size:inherit;color:inherit}
+.eyebrow{font-family:var(--font-display);font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--accent-ink)}
+.lead{font-size:18px;color:var(--muted);max-width:62ch}
+header.hero{max-width:1180px;margin:0 auto;padding:40px 0 8px;display:flex;flex-direction:column;gap:10px}
+.hero-meta{display:flex;flex-wrap:wrap;gap:8px 18px;color:var(--muted);font-size:14px}
+.hero-meta a{color:inherit}
+.layout{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:230px minmax(0,1fr);gap:48px;align-items:start}
+nav.toc{position:sticky;top:16px;font-size:14px;border-right:1px solid var(--line);padding-right:12px}
+nav.toc .eyebrow{display:block;margin-bottom:8px}
+nav.toc ol{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:2px}
+nav.toc a{display:block;padding:5px 8px;border-radius:6px;color:var(--fg);text-decoration:none}
+nav.toc a:hover{background:var(--accent-soft)}
+main{min-width:0}
+table{border-collapse:collapse;width:100%;font-size:14.5px;font-variant-numeric:tabular-nums}
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:var(--radius);margin:14px 0;background:var(--surface)}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-family:var(--font-display);font-size:12.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:700;background:color-mix(in srgb,var(--code-bg) 60%,var(--surface))}
+tr:last-child td{border-bottom:0}
+td code{white-space:nowrap}
+.verdict{font-family:var(--font-display);font-weight:800;letter-spacing:.04em;font-size:13px}
+.verdict.real{color:var(--real)}.verdict.fake{color:var(--fake)}
+.note{border-left:3px solid var(--accent);background:var(--accent-soft);padding:10px 14px;border-radius:0 var(--radius) var(--radius) 0;margin:14px 0;max-width:68ch}
+.note.warn{border-color:var(--warn);background:var(--warn-soft)}
+figure{margin:18px 0}
+figure img{display:block;max-width:100%;border:1px solid var(--line);border-radius:var(--radius)}
+figcaption{font-size:13px;color:var(--muted);margin-top:6px}
+.shots{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+.diagram{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:10px;align-items:center;margin:18px 0;max-width:100%}
+.box{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px;font-size:14px;min-width:0}
+.box b{font-family:var(--font-display);display:block;margin-bottom:4px}
+.box small{color:var(--muted);display:block;line-height:1.45}
+.arrow{color:var(--accent);font-size:22px;text-align:center}
+.db{grid-column:3;justify-self:center;margin-top:-2px;text-align:center}
+.db .arrow{display:block;transform:rotate(90deg);line-height:1;margin:0 auto 4px}
+.kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin:14px 0}
+.kv div{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px}
+.kv .eyebrow{color:var(--muted)}
+.kv strong{font-family:var(--font-display);font-size:15px}
+.tree{font-size:13px}
+footer{max-width:1180px;margin:48px auto 0;padding-top:16px;border-top:1px solid var(--line);color:var(--muted);font-size:14px}
+@media (max-width:900px){
+  .layout{grid-template-columns:1fr;gap:16px}
+  nav.toc{position:sticky;top:0;z-index:5;background:var(--bg);border-right:0;border-bottom:1px solid var(--line);padding:8px 0}
+  nav.toc .eyebrow{display:none}
+  nav.toc ol{flex-direction:row;overflow-x:auto;white-space:nowrap;gap:4px;padding-bottom:4px}
+  .diagram{grid-template-columns:1fr}
+  .arrow{transform:rotate(90deg)}
+  .db{grid-column:1}
+  .db .arrow{transform:none}
+}
+@media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
+</style>
+</head>
+<body>
+<header class="hero">
+  <span class="eyebrow">Documentation</span>
+  <h1>Deepfake Video Detection</h1>
+  <p class="lead">A full-stack platform that takes a video upload, runs a ResNeXt50 + recurrent PyTorch model over face crops, and returns a REAL or FAKE verdict with confidence, frame statistics and a stored history.</p>
+  <div class="hero-meta">
+    <span>Java 17 · Spring Boot 3.3 · PostgreSQL</span>
+    <span>Python 3.11 · FastAPI · PyTorch · OpenCV</span>
+    <span>Author: <a href="https://github.com/subbulakshmi0928-maker">Subbulakshmi S</a></span>
+    <span>Licence: MIT</span>
+  </div>
+</header>
+
+<div class="layout">
+<nav class="toc" aria-label="Sections">
+  <span class="eyebrow">Contents</span>
+  <ol>
+    <li><a href="#overview">Overview</a></li>
+    <li><a href="#architecture">Architecture</a></li>
+    <li><a href="#quick-start">Quick start</a></li>
+    <li><a href="#configuration">Configuration</a></li>
+    <li><a href="#api">REST API</a></li>
+    <li><a href="#model">ML model</a></li>
+    <li><a href="#samples">Sample clips &amp; results</a></li>
+    <li><a href="#testing">Testing</a></li>
+    <li><a href="#deployment">Deployment</a></li>
+    <li><a href="#troubleshooting">Troubleshooting</a></li>
+    <li><a href="#structure">Project structure</a></li>
+    <li><a href="#credits">Credits &amp; licences</a></li>
+  </ol>
+</nav>
+
+<main>
+<section id="overview">
+  <h2>Overview</h2>
+  <p>The platform has three parts. A <strong>Spring Boot backend</strong> accepts the upload, stores the file, calls the ML service and persists the result in PostgreSQL; it also serves the web UI. A <strong>FastAPI ML service</strong> decodes the video, crops the largest frontal face in each sampled frame and scores the sequence with a ResNeXt50_32x4d backbone and a recurrent head. The <strong>web UI</strong> uploads with a progress bar, shows the verdict card, and lists every analysis with stats.</p>
+  <div class="kv">
+    <div><span class="eyebrow">Input</span><br><strong>MP4, MOV, AVI, MKV, WEBM</strong><br><small>up to 200 MB</small></div>
+    <div><span class="eyebrow">Output</span><br><strong>REAL / FAKE + confidence</strong><br><small>frames and faces analysed, timing, model name</small></div>
+    <div><span class="eyebrow">Inference</span><br><strong>2 to 4 s per clip on CPU</strong><br><small>20 frames at 112 × 112</small></div>
+    <div><span class="eyebrow">Storage</span><br><strong>PostgreSQL + local disk</strong><br><small>one <code>video_analysis</code> row per upload</small></div>
+  </div>
+  <div class="tbl"><table>
+    <thead><tr><th>Layer</th><th>Technology</th><th>Where</th></tr></thead>
+    <tbody>
+      <tr><td>Frontend</td><td>HTML, CSS, vanilla JavaScript</td><td><code>backend/src/main/resources/static</code></td></tr>
+      <tr><td>Backend</td><td>Java 17, Spring Boot 3.3, Spring Web, Spring Data JPA, RestClient</td><td><code>backend/</code></td></tr>
+      <tr><td>Database</td><td>PostgreSQL (9.5 to 16 tested)</td><td><code>backend/src/main/resources/schema.sql</code></td></tr>
+      <tr><td>ML service</td><td>Python 3.11, FastAPI, PyTorch, torchvision, OpenCV</td><td><code>ml-service/</code></td></tr>
+      <tr><td>Model</td><td>ResNeXt50_32x4d features per frame → GRU or LSTM → softmax over {FAKE, REAL}</td><td><code>ml-service/app/model.py</code></td></tr>
+    </tbody>
+  </table></div>
+  <figure>
+    <img src="screenshots/ui-fake-verdict.png" alt="Web UI showing a FAKE verdict at 100% confidence, stats tiles and a history table" width="1280" height="1250">
+    <figcaption>The web UI after analysing a face-swap deepfake: verdict card, confidence, frame statistics and the history table.</figcaption>
+  </figure>
+</section>
+
+<section id="architecture">
+  <h2>Architecture</h2>
+  <div class="diagram">
+    <div class="box"><b>Browser</b><small>Static UI: upload with progress, verdict card, history, stats. Talks to <code>/api/*</code>.</small></div>
+    <div class="arrow" aria-hidden="true">→</div>
+    <div class="box"><b>Spring Boot backend · :8080</b><small>AnalysisController → DetectionService → StorageService, MlClient, VideoAnalysisRepository</small></div>
+    <div class="arrow" aria-hidden="true">→</div>
+    <div class="box"><b>ML service · :8000</b><small>FastAPI <code>/predict</code>: frame sampling, Haar face crop, ResNeXt50 + recurrent head, softmax</small></div>
+    <div class="db"><span class="arrow" aria-hidden="true">→</span><div class="box"><b>PostgreSQL</b><small><code>video_analysis</code>: verdict, confidence, frames, faces, timing, file metadata</small></div></div>
+  </div>
+  <h3>Request flow</h3>
+  <ol>
+    <li>The browser posts the video as <code>multipart/form-data</code> to <code>POST /api/analyses</code>.</li>
+    <li><code>DetectionService</code> validates the extension, stores the file under a UUID name and calls <code>MlClient.predict</code>.</li>
+    <li>The ML service picks <code>SEQUENCE_LENGTH</code> frames, crops the largest frontal face per frame with 15 % padding (centre square when no face is found), resizes to 112 × 112 RGB, normalises with ImageNet statistics and runs the model. Softmax over the two classes gives <code>fake_probability</code> and <code>real_probability</code>.</li>
+    <li>The backend persists a <code>video_analysis</code> row, or an <code>ERROR</code> row if the ML call failed, and returns it.</li>
+    <li>The UI renders the verdict card and refreshes the history table and stats tiles.</li>
+  </ol>
+  <p>The ML call is deliberately outside any database transaction, so a slow video never pins a connection. If the ML service is down, the upload is still recorded with verdict <code>ERROR</code> and the client receives HTTP 502 with a JSON body.</p>
+</section>
+
+<section id="quick-start">
+  <h2>Quick start</h2>
+  <h3>Prerequisites</h3>
+  <ul>
+    <li>Java 17 (the Maven wrapper <code>./mvnw</code> downloads Maven itself).</li>
+    <li>Python 3.10 or newer.</li>
+    <li>PostgreSQL on <code>localhost:5432</code>, or Docker for the compose option.</li>
+  </ul>
+  <h3>Option A: one command</h3>
+  <pre><code>git clone &lt;repository-url&gt; deepfake-video-detection
+cd deepfake-video-detection
+
+# database, once
+psql -h localhost -U postgres -c "CREATE ROLE deepfake LOGIN PASSWORD 'deepfake';"
+psql -h localhost -U postgres -c "CREATE DATABASE deepfake_db OWNER deepfake;"
+
+# python dependencies and a pretrained checkpoint
+cd ml-service &amp;&amp; python3 -m pip install -r requirements.txt -r requirements-dev.txt
+python3 -m scripts.download_weights --frames 20
+cd ..
+
+./run-local.sh        # starts ML service (:8000) and backend + UI (:8080), Ctrl+C stops both</code></pre>
+  <p>Open <a href="http://localhost:8080">http://localhost:8080</a>, drop a clip from <code>docs/samples/</code> onto the upload box and press <strong>Analyze</strong>. The script detects a PostgreSQL server older than 12 and switches the backend to the <code>legacypg</code> profile automatically.</p>
+  <h3>Option B: start the services yourself</h3>
+  <pre><code># terminal 1: ML service
+cd ml-service
+uvicorn app.main:app --host 0.0.0.0 --port 8000
+
+# terminal 2: backend + UI
+cd backend
+./mvnw spring-boot:run                       # PostgreSQL 12 or newer
+SPRING_PROFILES_ACTIVE=legacypg ./mvnw spring-boot:run   # PostgreSQL older than 12</code></pre>
+  <h3>Option C: Docker Compose</h3>
+  <pre><code>docker compose up --build
+# UI       http://localhost:8080
+# ML docs  http://localhost:8000/docs</code></pre>
+  <p>Compose starts PostgreSQL 16, builds both images and mounts <code>ml-service/weights/</code> read-only into the ML container, so download a checkpoint first.</p>
+</section>
+
+<section id="configuration">
+  <h2>Configuration</h2>
+  <p>Everything is an environment variable with a sensible default. Nothing needs editing to run locally.</p>
+  <h3>Backend</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>Variable</th><th>Default</th><th>Purpose</th></tr></thead>
+    <tbody>
+      <tr><td><code>PORT</code></td><td><code>8080</code></td><td>HTTP port for the API and UI</td></tr>
+      <tr><td><code>DB_URL</code></td><td><code>jdbc:postgresql://localhost:5432/deepfake_db</code></td><td>JDBC URL</td></tr>
+      <tr><td><code>DB_USER</code> / <code>DB_PASSWORD</code></td><td><code>deepfake</code> / <code>deepfake</code></td><td>Database credentials</td></tr>
+      <tr><td><code>ML_BASE_URL</code></td><td><code>http://localhost:8000</code></td><td>Where the ML service listens</td></tr>
+      <tr><td><code>ML_READ_TIMEOUT_MS</code></td><td><code>180000</code></td><td>How long to wait for one prediction</td></tr>
+      <tr><td><code>APP_STORAGE_DIR</code></td><td><code>./uploads</code></td><td>Where uploaded videos are kept. Use an absolute path in production.</td></tr>
+      <tr><td><code>SPRING_PROFILES_ACTIVE</code></td><td>unset</td><td>Set to <code>legacypg</code> for PostgreSQL older than 12</td></tr>
+    </tbody>
+  </table></div>
+  <p>Uploads are capped at 200 MB (<code>spring.servlet.multipart.max-file-size</code>). The schema is created on start-up from <code>schema.sql</code>, which is idempotent and uses <code>BIGSERIAL</code> so it also works on old servers. CORS is open on <code>/api/**</code> for development.</p>
+  <h3>ML service</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>Variable</th><th>Default</th><th>Purpose</th></tr></thead>
+    <tbody>
+      <tr><td><code>MODEL_PATH</code></td><td>first <code>*.pt</code> in <code>WEIGHTS_DIR</code></td><td>Checkpoint to load</td></tr>
+      <tr><td><code>WEIGHTS_DIR</code></td><td><code>./weights</code></td><td>Folder scanned for checkpoints</td></tr>
+      <tr><td><code>SEQUENCE_LENGTH</code></td><td>read from the file name (<code>_20_frames</code>), else 20</td><td>Frames fed to the model per video</td></tr>
+      <tr><td><code>IMAGE_SIZE</code></td><td><code>112</code></td><td>Square crop size in pixels</td></tr>
+      <tr><td><code>DEVICE</code></td><td><code>auto</code> (CUDA if present, else CPU)</td><td>Torch device; <code>cpu</code>, <code>cuda</code>, <code>mps</code></td></tr>
+      <tr><td><code>FACE_PADDING</code></td><td><code>0.15</code></td><td>Margin added around the detected face, as a fraction of its size</td></tr>
+      <tr><td><code>ARCH_PROFILE</code></td><td><code>auto</code></td><td><code>gru</code> (this project's model) or <code>jadhav-lstm</code> (public checkpoints); <code>auto</code> reads the checkpoint</td></tr>
+      <tr><td><code>MAX_UPLOAD_MB</code></td><td><code>200</code></td><td>Reject larger files with HTTP 413</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="api">
+  <h2>REST API</h2>
+  <h3>Backend, port 8080</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>Method</th><th>Path</th><th>Description</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td><code>POST</code></td><td><code>/api/analyses</code></td><td>Multipart field <code>file</code>. Analyses the video and stores the result.</td><td>201, 400, 413, 502</td></tr>
+      <tr><td><code>GET</code></td><td><code>/api/analyses?page=0&amp;size=20</code></td><td>History, newest first. <code>size</code> is clamped to 1–100.</td><td>200</td></tr>
+      <tr><td><code>GET</code></td><td><code>/api/analyses/{id}</code></td><td>One analysis</td><td>200, 404</td></tr>
+      <tr><td><code>DELETE</code></td><td><code>/api/analyses/{id}</code></td><td>Deletes the row and the stored file</td><td>204, 404</td></tr>
+      <tr><td><code>GET</code></td><td><code>/api/analyses/stats</code></td><td>Counts by verdict and average confidence (errors excluded)</td><td>200</td></tr>
+      <tr><td><code>GET</code></td><td><code>/api/health</code></td><td>Backend status plus the ML service's health map</td><td>200</td></tr>
+      <tr><td><code>GET</code></td><td><code>/actuator/health</code>, <code>/actuator/info</code></td><td>Spring Boot Actuator</td><td>200</td></tr>
+    </tbody>
+  </table></div>
+  <h3>Analyse a video</h3>
+  <pre><code>curl -F file=@docs/samples/fake_kim_jong_un_representus.webm http://localhost:8080/api/analyses</code></pre>
+  <pre><code>{
+  "id": 3,
+  "fileName": "fake_kim_jong_un_representus.webm",
+  "sizeBytes": 3026323,
+  "verdict": "FAKE",
+  "confidence": 0.9999,
+  "fakeProbability": 0.9999,
+  "framesAnalyzed": 20,
+  "facesDetected": 20,
+  "processingMs": 3948,
+  "modelName": "resnext50_32x4d+lstm · model_87_acc_20_frames_final_data.pt",
+  "errorMessage": null,
+  "createdAt": "2026-10-18T12:39:03.747Z"
+}</code></pre>
+  <h3>History and stats</h3>
+  <pre><code>GET /api/analyses?page=0&amp;size=3
+{ "items": [ { "id": 4, "verdict": "FAKE", ... }, ... ], "page": 0, "size": 3, "total": 4 }
+
+GET /api/analyses/stats
+{ "total": 4, "fake": 2, "real": 2, "errors": 0, "avgConfidence": 0.9894 }</code></pre>
+  <h3>Errors</h3>
+  <p>Every error is JSON with the same shape. Validation failures are 400, an unknown id is 404, an oversized upload is 413, and an ML failure is 502 (the upload is still recorded with verdict <code>ERROR</code>).</p>
+  <pre><code>{
+  "timestamp": "2026-10-18T12:39:14.711Z",
+  "status": 400,
+  "error": "Bad Request",
+  "message": "Unsupported file type '.md'; allowed: avi, mkv, mov, mp4, webm"
+}</code></pre>
+  <h3>ML service, port 8000</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>Method</th><th>Path</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><code>GET</code></td><td><code>/health</code></td><td><code>status</code>, <code>model_loaded</code>, <code>trained</code>, <code>device</code>, <code>weights</code>, <code>sequence_length</code>, <code>image_size</code></td></tr>
+      <tr><td><code>GET</code></td><td><code>/model</code></td><td>Backbone, recurrent type, profile, weights file, class index mapping</td></tr>
+      <tr><td><code>POST</code></td><td><code>/predict</code></td><td>Multipart field <code>file</code>. Returns <code>label</code>, <code>confidence</code>, <code>fake_probability</code>, <code>real_probability</code>, <code>frames_analyzed</code>, <code>frames_total</code>, <code>faces_detected</code>, <code>fps</code>, <code>duration_s</code>, <code>processing_ms</code>, <code>model</code></td></tr>
+      <tr><td><code>GET</code></td><td><code>/docs</code></td><td>Interactive Swagger UI generated by FastAPI</td></tr>
+    </tbody>
+  </table></div>
+  <figure>
+    <img src="screenshots/ml-service-swagger.png" alt="Swagger UI of the ML service listing /health, /model and /predict" width="1280" height="1100">
+    <figcaption>The ML service documents itself at <code>/docs</code>.</figcaption>
+  </figure>
+</section>
+
+<section id="model">
+  <h2>ML model</h2>
+  <p>Each sampled frame goes through <code>torchvision.models.resnext50_32x4d</code> (ImageNet weights, final pooling and classifier removed) and becomes a 2048-dimensional feature vector. A recurrent layer with hidden size 2048 reads the sequence, followed by dropout 0.4 and a linear layer with two outputs. Class index 0 is <strong>FAKE</strong>, index 1 is <strong>REAL</strong>; the reported confidence is the softmax probability of the chosen class.</p>
+  <h3>Architecture profiles</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>Profile</th><th>Recurrent layer</th><th>Pooling</th><th>Frame sampling</th><th>Use</th></tr></thead>
+    <tbody>
+      <tr><td><code>gru</code></td><td>GRU, batch-first, with bias</td><td>Mean of GRU outputs over time</td><td>Spread evenly over the clip</td><td>This project's own model; train it with <code>scripts/train.py</code></td></tr>
+      <tr><td><code>jadhav-lstm</code></td><td>LSTM created as <code>nn.LSTM(2048, 2048, 1, False)</code>, so <em>bias=False</em> and <em>batch_first=False</em></td><td>Per-frame logits averaged</td><td>Consecutive frames from the first detected face</td><td>Loads the public ResNeXt50 + LSTM checkpoints unchanged</td></tr>
+    </tbody>
+  </table></div>
+  <p>The public checkpoints were trained with an LSTM whose fourth positional argument was meant to be <code>bidirectional</code> but is actually <code>bias</code>, and without <code>batch_first</code>, so every frame is effectively scored on its own. The <code>jadhav-lstm</code> profile reproduces that exactly, which keeps the weights valid, and then averages the per-frame logits instead of trusting the last frame only.</p>
+  <h3>Preprocessing</h3>
+  <ol>
+    <li>Decode with OpenCV. For <code>head</code> sampling, scan the first three seconds for the first frame with a face and take <code>SEQUENCE_LENGTH</code> consecutive frames from there; for <code>uniform</code> sampling, spread the frames over the whole clip.</li>
+    <li>Detect faces with the Haar frontal-face cascade on a copy downscaled to 640 px wide, keep the largest, add 15 % padding. Without a face, use the centre square.</li>
+    <li>Resize to 112 × 112, convert to RGB, scale to 0–1 and normalise with ImageNet mean and standard deviation.</li>
+    <li>Repeat the last frame when the clip is shorter than the sequence length.</li>
+  </ol>
+  <div class="note">On four real-world clips, the choice of RGB input, consecutive frames from the first face and 15 % padding was the only combination that separated real footage (≤ 0.15 fake probability) from face-swap deepfakes (≥ 0.99). BGR input or evenly spread frames made the deepfakes score REAL.</div>
+  <h3>Weights</h3>
+  <p>The service loads the first <code>*.pt</code> in <code>ml-service/weights/</code>. Without one it still starts, uses an ImageNet backbone with an untrained head, and reports <code>trained: false</code>; the UI then shows an amber "untrained demo weights" pill.</p>
+  <pre><code># pretrained checkpoint (226 MB), 20 frames, trained on FaceForensics++ / Celeb-DF / DFDC
+python3 -m scripts.download_weights --frames 20
+python3 -m scripts.download_weights --list      # see every checkpoint in the public folder
+
+# train your own GRU model: DATA/{train,val}/{real,fake}/*.mp4
+python3 -m scripts.train --data DATA --epochs 10 --seq-len 20 --out weights/deepfake_gru_20_frames.pt</code></pre>
+  <p>Checkpoints are loaded with <code>torch.load(..., weights_only=True)</code>, so a downloaded file cannot execute code. Training writes the profile, sequence length and image size into the checkpoint so the service configures itself from it.</p>
+  <h3>Limitations</h3>
+  <ul>
+    <li>The public checkpoint learned face-swap deepfakes with a visible frontal face. Fully generated video, cartoons, or clips without a face are outside its training distribution and verdicts on them are not meaningful.</li>
+    <li>Its published accuracy (87 %) is on its own benchmark split. The sample clips here are a smoke test, not an evaluation.</li>
+    <li>The Haar cascade misses strongly turned faces; the centre-square fallback keeps the pipeline running but lowers confidence.</li>
+  </ul>
+</section>
+
+<section id="samples">
+  <h2>Sample clips &amp; results</h2>
+  <p>All clips live in <code>docs/samples/</code>. Only the synthetic ones were made by this project; the rest come from Wikimedia Commons under licences that allow redistribution.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>File</th><th>What it is</th><th>Licence</th><th>Verdict</th><th>Confidence</th><th>Faces / 20</th></tr></thead>
+    <tbody>
+      <tr><td><code>real_tarun_speaking.webm</code></td><td>Person speaking to camera, genuine footage</td><td>CC0 1.0</td><td><span class="verdict real">REAL</span></td><td>99.8 %</td><td>20</td></tr>
+      <tr><td><code>real_youth_testimonial_15s.webm</code></td><td>"Doing It – Youth Testimonial", genuine footage</td><td>Public domain (US federal work)</td><td><span class="verdict real">REAL</span></td><td>96.4 %</td><td>19</td></tr>
+      <tr><td><code>fake_kim_jong_un_representus.webm</code></td><td>Face-swap deepfake PSA by RepresentUs (2020)</td><td>CC BY 3.0 © RepresentUs</td><td><span class="verdict fake">FAKE</span></td><td>99.99 %</td><td>20</td></tr>
+      <tr><td><code>fake_putin_representus.webm</code></td><td>Face-swap deepfake PSA by RepresentUs (2020)</td><td>CC BY 3.0 © RepresentUs</td><td><span class="verdict fake">FAKE</span></td><td>99.8 %</td><td>20</td></tr>
+      <tr><td><code>sample_clip_1.mp4</code>, <code>sample_clip_2.mp4</code></td><td>Synthetic cartoon-face clips for pipeline tests</td><td>MIT (this repository)</td><td colspan="3">not meaningful (no real face)</td></tr>
+    </tbody>
+  </table></div>
+  <div class="shots">
+    <figure><img src="screenshots/ui-fake-verdict.png" alt="UI with FAKE verdict" width="1280" height="1250"><figcaption>Deepfake PSA: FAKE, 100 %.</figcaption></figure>
+    <figure><img src="screenshots/ui-real-verdict.png" alt="UI with REAL verdict" width="1280" height="1250"><figcaption>Genuine footage: REAL, 99.8 %.</figcaption></figure>
+  </div>
+</section>
+
+<section id="testing">
+  <h2>Testing</h2>
+  <pre><code>cd backend &amp;&amp; ./mvnw test          # 18 tests: MockMvc controller tests on H2 with the ML client mocked,
+                                   # plus RestClient wire-format tests against MockRestServiceServer
+cd ml-service &amp;&amp; python3 -m pytest # 5 tests: health, model info, prediction on a synthetic clip,
+                                   # unsupported extension (400), undecodable video (400)</code></pre>
+  <p>The backend tests run on an in-memory H2 database in PostgreSQL mode, so they need neither PostgreSQL nor the ML service. The ML tests generate their own one-second clip and run the real model on CPU; set <code>SEQUENCE_LENGTH=6</code> (the tests do this) to keep them under five seconds.</p>
+</section>
+
+<section id="deployment">
+  <h2>Deployment</h2>
+  <h3>Containers</h3>
+  <p><code>backend/Dockerfile</code> is a two-stage build (Maven with Temurin 17, then a slim JRE) that produces an image running <code>java -jar app.jar</code> with uploads under <code>/app/uploads</code>. <code>ml-service/Dockerfile</code> installs CPU wheels of PyTorch from the official index and serves with Uvicorn on port 8000. <code>docker-compose.yml</code> wires both to PostgreSQL 16 with health checks and named volumes for the database and uploads.</p>
+  <h3>Before exposing it publicly</h3>
+  <ul>
+    <li>Put the backend behind HTTPS and add authentication; the API currently has none and CORS is open on <code>/api/**</code>.</li>
+    <li>Set <code>APP_STORAGE_DIR</code> to a persistent absolute path, or swap <code>StorageService</code> for object storage.</li>
+    <li>Give the ML service a GPU (<code>DEVICE=cuda</code>) or more CPU; one prediction takes 2 to 4 s of CPU time and requests are processed one at a time per worker.</li>
+    <li>Lower <code>MAX_UPLOAD_MB</code> and the backend's multipart limits to what you actually need.</li>
+    <li>Change the database password and keep it out of <code>docker-compose.yml</code> (use an env file or secrets).</li>
+  </ul>
+</section>
+
+<section id="troubleshooting">
+  <h2>Troubleshooting</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>Symptom</th><th>Cause</th><th>Fix</th></tr></thead>
+    <tbody>
+      <tr><td><code>module 'cv2' has no attribute 'CascadeClassifier'</code></td><td>OpenCV 5 removed the Haar cascade API</td><td><code>pip install "opencv-python-headless&gt;=4.9,&lt;5"</code> (pinned in <code>requirements.txt</code>)</td></tr>
+      <tr><td><code>GET /api/analyses</code> returns 500 with <code>syntax error at or near "$1"</code></td><td>PostgreSQL older than 12 rejects Hibernate's <code>FETCH FIRST ?</code> paging</td><td>Start the backend with <code>SPRING_PROFILES_ACTIVE=legacypg</code></td></tr>
+      <tr><td>Header pill says "untrained demo weights"</td><td>No checkpoint in <code>ml-service/weights/</code></td><td><code>python3 -m scripts.download_weights --frames 20</code>, then restart the ML service</td></tr>
+      <tr><td>Uploads return 502 and the history shows <code>ERROR</code> rows</td><td>ML service down or <code>ML_BASE_URL</code> wrong</td><td>Check <code>curl localhost:8000/health</code>; fix the URL or start the service</td></tr>
+      <tr><td><code>Port 8080 was already in use</code></td><td>Another process owns the port</td><td>Set <code>PORT=8081</code> (backend) or <code>--port 8001</code> plus <code>ML_BASE_URL</code> (ML)</td></tr>
+      <tr><td>Hibernate logs <code>HHH000511 ... version ... no longer supported</code></td><td>Old PostgreSQL server</td><td>Harmless with the <code>legacypg</code> profile; upgrade PostgreSQL when you can</td></tr>
+      <tr><td>Cartoon or fully generated videos get confident verdicts</td><td>Out of the model's training distribution</td><td>Expected; see <a href="#model">Limitations</a></td></tr>
+      <tr><td>Predictions are slow</td><td>CPU inference, 20 frames through ResNeXt50</td><td>Use <code>DEVICE=cuda</code> on a GPU host; do not lower <code>SEQUENCE_LENGTH</code> below what the checkpoint was trained with</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="structure">
+  <h2>Project structure</h2>
+<pre class="tree"><code>deepfake-video-detection/
+├── backend/                         Spring Boot app
+│   ├── pom.xml, mvnw, mvnw.cmd, .mvn/
+│   ├── Dockerfile
+│   └── src/main/java/com/subbulakshmi/deepfake/
+│       ├── config/      MlProperties, StorageProperties, WebConfig, LegacyPostgresDialect
+│       ├── domain/      VideoAnalysis, Verdict, VideoAnalysisRepository
+│       ├── ml/          MlClient, MlPrediction, MlModelInfo, MlServiceException
+│       ├── service/     DetectionService
+│       ├── storage/     StorageService
+│       └── web/         AnalysisController, GlobalExceptionHandler, dto/
+│   └── src/main/resources/  application.yml, application-legacypg.yml, schema.sql, static/
+│   └── src/test/java/       AnalysisControllerTest, MlClientTest
+├── ml-service/                      FastAPI + PyTorch
+│   ├── app/             config.py, model.py, video.py, main.py
+│   ├── scripts/         download_weights.py, train.py, make_sample_video.py
+│   ├── tests/           test_api.py
+│   ├── weights/         *.pt (git-ignored)
+│   ├── requirements.txt, requirements-dev.txt, Dockerfile
+├── docs/                architecture.md, DEMO.md, samples/, screenshots/, index.html (this page)
+├── docker-compose.yml
+├── run-local.sh
+└── README.md, LICENSE</code></pre>
+</section>
+
+<section id="credits">
+  <h2>Credits &amp; licences</h2>
+  <ul>
+    <li>Application code: MIT licence, © 2026 Subbulakshmi S.</li>
+    <li>Pretrained checkpoints: from the GPL-3.0 project <a href="https://github.com/abhijitjadhav1998/Deepfake_detection_using_deep_learning">Deepfake_detection_using_deep_learning</a> by Abhijit Jadhav; downloaded on demand, never committed.</li>
+    <li>Backbone weights: torchvision's ImageNet-pretrained ResNeXt50_32x4d.</li>
+    <li>Sample clips: Wikimedia Commons, licences listed in <a href="#samples">Sample clips &amp; results</a> and in <code>docs/samples/SAMPLES.md</code>.</li>
+    <li>Face detection: OpenCV's Haar frontal-face cascade.</li>
+  </ul>
+</section>
+</main>
+</div>
+
+<footer>Deepfake Video Detection · documentation generated from the repository on 18 October 2026 · <a href="https://subbulakshmi0928-maker.github.io/fullstack-portfolio/">Subbulakshmi S portfolio</a></footer>
+
+</body>
+</html>

@@ -12,7 +12,9 @@ A Spring Boot backend handles uploads, persistence (PostgreSQL) and the web UI; 
 | ML service | Python 3.11, FastAPI, PyTorch, torchvision, OpenCV |
 | Model | ResNeXt50_32x4d features per frame → GRU (or LSTM) → softmax over {FAKE, REAL} |
 
-See [docs/architecture.md](docs/architecture.md) for the request flow and model details, and
+**Documentation:** [hosted docs site](https://claude.ai/artifact/B9LMNq44eLqoKfXthjjKga) · source in [docs/index.html](docs/index.html)
+(enable GitHub Pages on `main` → `/docs` to serve it from this repository). Also see
+[docs/architecture.md](docs/architecture.md) for the request flow and model details, and
 [docs/DEMO.md](docs/DEMO.md) for a recorded end-to-end run with sample clips.
 
 ![Deepfake Video Detection UI](docs/screenshots/ui-fake-verdict.png)
